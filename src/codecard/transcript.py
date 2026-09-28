@@ -8,6 +8,7 @@ import glob
 import json
 import os
 import re
+import textwrap
 from pathlib import Path
 
 from .lexers import Row
@@ -133,7 +134,9 @@ def to_rows(events: list[dict], cols: int, result_lines: int = 3, redact=lambda 
     rows: list[Row] = []
 
     def block(first: list[tuple[str, str]], text: str, cls: str, indent: int, rcls: str = ""):
-        lines = text.splitlines() or [""]
+        # prose: wrap at word boundaries; wrap() below still hard-breaks anything longer
+        lines = [w for l in (text.splitlines() or [""])
+                 for w in (textwrap.wrap(l, cols - indent, break_long_words=True) or [""])]
         body = [(rcls, first + [(cls, lines[0])])] + [(rcls, [("", " " * indent), (cls, l)]) for l in lines[1:]]
         rows.extend(wrap(body, cols, indent))
 

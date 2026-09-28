@@ -1,0 +1,11 @@
+$ claude --safe-mode                # all customizations off
+
+$ claude -w my-feature              # session in its own worktree
+$ echo '.env' >> .worktreeinclude   # copy gitignored files in
+
+$ claude --continue --fork-session  # branch the conversation
+
+$ claude --bg "fix the flaky test"  # run in the background
+$ claude agents                     # list background sessions
+$ claude logs <id>                  # what is it doing?
+$ claude attach <id>                # bring it back

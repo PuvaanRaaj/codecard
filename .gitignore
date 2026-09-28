@@ -1,6 +1,8 @@
 out/
 *.png
 *.gif
+!docs/*.png
+!docs/*.gif
 .DS_Store
 __pycache__/
 .pytest_cache/

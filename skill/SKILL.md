@@ -23,3 +23,4 @@ Prints the absolute output path on success; errors go to stderr with exit 1.
 - Keep cards readable: trim snippets to the lines that matter, `--cols 70-90`, <= ~30 rows. Split long content into several cards rather than one huge one.
 - **Always view the result** with the Read tool before reporting it done; fix clipping or awkward wrapping with `--cols` or by trimming input.
 - Report the output path(s) so the user can drag them into the post.
+- If the codecard MCP server is connected, its `render_*` tools do the same job and return the image directly; prefer them over the CLI.

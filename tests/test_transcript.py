@@ -60,7 +60,7 @@ def test_rows_tui_shape_and_result_truncation(tmp_path):
 
 
 def test_redaction_applies_to_transcript(tmp_path):
-    ev = transcript.load_events(write(tmp_path, [u("my token is glpat-abcdefghijklmnopqrstuv")]))
+    ev = transcript.load_events(write(tmp_path, [u("my token is glpat" + "-abcdefghijklmnopqrstuv")]))
     flat = "".join(t for r in transcript.to_rows(ev, 80, redact=redact) for _, t in r[1])
     assert "abcdefghijklmnop" not in flat
 
@@ -79,3 +79,9 @@ def test_cap_rows_starts_on_a_block_and_counts_dropped(tmp_path):
     assert first.startswith(("●", ">"))
     assert capped[0][1][0][1] == f"… {len(rows) - (len(capped) - 1)} earlier rows"
     assert transcript.cap_rows(rows, 100) == rows
+
+
+def test_prose_wraps_on_word_boundaries(tmp_path):
+    ev = transcript.load_events(write(tmp_path, [a({"type": "text", "text": "alpha beta gamma delta epsilon"})]))
+    flat = ["".join(t for _, t in r[1]) for r in transcript.to_rows(ev, cols=16)]
+    assert flat == ["● alpha beta", "  gamma delta", "  epsilon"]

@@ -3,8 +3,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import lexers, render, transcript
-from .redact import redact
+from . import render
+from .card import render_card
 
 
 def _read(src: str | None) -> tuple[str, str | None]:
@@ -14,11 +14,6 @@ def _read(src: str | None) -> tuple[str, str | None]:
         return sys.stdin.read(), None
     p = Path(src).expanduser()
     return p.read_text(encoding="utf-8", errors="replace"), p.name
-
-
-def _auto_cols(rows, lo=40, hi=100) -> int:
-    longest = max((sum(len(t) for _, t in toks) for _, toks in rows), default=lo)
-    return max(lo, min(hi, longest + 1))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -52,43 +47,20 @@ def main(argv: list[str] | None = None) -> int:
     common(p)
     a = ap.parse_args(argv)
 
-    scrub = (lambda s: s) if a.no_redact else redact
     try:
+        kw = dict(title=a.title, bg=a.bg, cols=a.cols, gif=a.gif, scale=a.scale, redact_on=not a.no_redact)
         if a.kind == "transcript":
-            path = transcript.find_session(a.session)
-            events = transcript.last_turns(transcript.load_events(path), a.turns)
-            cols = a.cols or 90
-            rows = transcript.to_rows(events, cols, a.result_lines, scrub)
-            rows = transcript.cap_rows(rows, a.max_rows)
-            title = a.title or "Claude Code"
+            kw.update(session=a.session, turns=a.turns, max_rows=a.max_rows, result_lines=a.result_lines)
         else:
-            text, name = _read(a.input)
-            text = scrub(text)
+            kw["text"], kw["name"] = _read(a.input)
             if a.kind == "code":
-                rows = lexers.code(text, a.lang, name)
-            elif a.kind == "term":
-                rows = lexers.term(text)
-            else:
-                rows = lexers.diff(text)
-            cols = a.cols or _auto_cols(rows)
-            rows = lexers.wrap(rows, cols)
-            title = a.title if a.title is not None else (name or {"term": "Terminal", "diff": "diff", "code": ""}[a.kind])
-
+                kw["lang"] = a.lang
         out = Path(a.out or f"codecard-{a.kind}.{'gif' if a.gif else 'png'}")
-        as_gif = a.gif or out.suffix.lower() == ".gif"
-        scale = a.scale or (1 if as_gif else 2)
-        doc, w, h = render.to_html(rows, title, cols, a.bg)
-        if as_gif:
-            import tempfile
-            with tempfile.TemporaryDirectory() as tmp:
-                png = render.screenshot(doc, w, h, Path(tmp) / "full.png", scale)
-                render.gif(png, rows, cols, out, scale)
-        else:
-            render.screenshot(doc, w, h, out, scale, transparent=a.bg == "none")
-    except (FileNotFoundError, RuntimeError, OSError) as e:
+        path = render_card(a.kind, out, **kw)
+    except (FileNotFoundError, RuntimeError, OSError, ValueError) as e:
         print(f"codecard: {e}", file=sys.stderr)
         return 1
-    print(out.resolve())
+    print(path)
     return 0
 
 

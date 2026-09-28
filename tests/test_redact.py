@@ -2,13 +2,13 @@ from codecard.redact import MASK, redact
 
 
 def test_known_token_prefixes_keep_prefix():
-    s = redact("glpat-abcdefghijklmnopqrst12 and ghp_" + "a" * 36)
+    s = redact("glpat" + "-abcdefghijklmnopqrst12 and ghp_" + "a" * 36)  # split so secret scanners ignore the fakes
     assert "glpat-" + MASK in s and "ghp_" + MASK in s
     assert "abcdefghij" not in s
 
 
 def test_anthropic_and_aws_keys():
-    s = redact("sk-ant-api03-" + "x" * 30 + " AKIAABCDEFGHIJKLMNOP")
+    s = redact("sk-ant-api03-" + "x" * 30 + " AKIA" + "ABCDEFGHIJKLMNOP")
     assert "xxxxxxxx" not in s and "ABCDEFGHIJKLMNOP" not in s
 
 

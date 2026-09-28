@@ -1,0 +1,11 @@
+diff --git a/src/codecard/render.py b/src/codecard/render.py
+--- a/src/codecard/render.py
++++ b/src/codecard/render.py
+@@ -90,7 +90,8 @@ def screenshot(doc, w, h, out, scale=2):
+         cmd = [find_chrome(), "--headless=new", "--disable-gpu",
+-               f"--user-data-dir={tmp}/profile",
++               "--no-first-run", "--no-default-browser-check",
+         ]
+-        r = subprocess.run(cmd, capture_output=True, timeout=60)
++        proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, text=True)
++        # Chrome may write the PNG and never exit: poll, then kill
