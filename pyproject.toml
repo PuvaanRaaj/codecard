@@ -1,0 +1,19 @@
+[project]
+name = "codecard"
+version = "0.1.0"
+description = "Carbon-style images of code, terminal sessions, diffs and Claude Code transcripts, rendered locally."
+requires-python = ">=3.10"
+dependencies = ["pygments>=2.17", "pillow>=10.0"]
+
+[project.scripts]
+codecard = "codecard.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/codecard"]

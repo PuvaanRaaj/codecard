@@ -1,0 +1,7 @@
+out/
+*.png
+*.gif
+.DS_Store
+__pycache__/
+.pytest_cache/
+.venv/
